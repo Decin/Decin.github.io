@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+<link rel="stylesheet" href="/css/main.css?v=7.1.2">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.1.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.1.2">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.1.2" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.1.2',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: true,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="VLC源码分析Decin Jan 12th, 2018 VLC  0x00 前置信息VLC是一个非常庞大的工程，我从它的架构及流程入手进行分析，涉及到一些很细的概念先搁置一边，日后详细分析。 0x01 源码结构12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152">
+<meta name="keywords" content="vlc,播放器,音视频">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VLC源码分析">
+<meta property="og:url" content="http://decin.github.io/2019/01/12/VLC源码分析/index.html">
+<meta property="og:site_name" content="Decin&#39;s blogs">
+<meta property="og:description" content="VLC源码分析Decin Jan 12th, 2018 VLC  0x00 前置信息VLC是一个非常庞大的工程，我从它的架构及流程入手进行分析，涉及到一些很细的概念先搁置一边，日后详细分析。 0x01 源码结构12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://images.videolan.org/images/VLC-IconSmall.png">
+<meta property="og:image" content="http://decin.github.io/2019/01/12/VLC源码分析/modules_structure.png">
+<meta property="og:image" content="https://jiya.io/usr/uploads/2015/01/453586046.jpg">
+<meta property="og:image" content="https://jiya.io/usr/uploads/2015/01/2942014279.png">
+<meta property="og:image" content="http://decin.github.io/2019/01/12/VLC源码分析/VLC%E6%B5%81%E7%A8%8B%E5%9B%BE.png">
+<meta property="og:updated_time" content="2019-06-18T08:32:17.246Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="VLC源码分析">
+<meta name="twitter:description" content="VLC源码分析Decin Jan 12th, 2018 VLC  0x00 前置信息VLC是一个非常庞大的工程，我从它的架构及流程入手进行分析，涉及到一些很细的概念先搁置一边，日后详细分析。 0x01 源码结构12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152">
+<meta name="twitter:image" content="https://images.videolan.org/images/VLC-IconSmall.png">
+
+
+
+
+
+  
+  
+  <link rel="canonical" href="http://decin.github.io/2019/01/12/VLC源码分析/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>VLC源码分析 | Decin's blogs</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Decin's blogs</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">one dream</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://decin.github.io/2019/01/12/VLC源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Decin">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Decin's blogs">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">VLC源码分析
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-01-12 20:30:56" itemprop="dateCreated datePublished" datetime="2019-01-12T20:30:56+08:00">2019-01-12</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-06-18 16:32:17" itemprop="dateModified" datetime="2019-06-18T16:32:17+08:00">2019-06-18</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/vlc/" itemprop="url" rel="index"><span itemprop="name">vlc</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="VLC源码分析"><a href="#VLC源码分析" class="headerlink" title="VLC源码分析"></a>VLC源码分析</h2><p>Decin Jan 12th, 2018 VLC</p>
+<p><img src="https://images.videolan.org/images/VLC-IconSmall.png" alt></p>
+<h3 id="0x00-前置信息"><a href="#0x00-前置信息" class="headerlink" title="0x00 前置信息"></a>0x00 前置信息</h3><p>VLC是一个非常庞大的工程，我从它的架构及流程入手进行分析，涉及到一些很细的概念先搁置一边，日后详细分析。</p>
+<h3 id="0x01-源码结构"><a href="#0x01-源码结构" class="headerlink" title="0x01 源码结构"></a>0x01 源码结构</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── AUTHORS</span><br><span class="line">├── COPYING</span><br><span class="line">├── COPYING.LIB</span><br><span class="line">├── INSTALL</span><br><span class="line">├── NEWS</span><br><span class="line">├── README</span><br><span class="line">├── THANKS</span><br><span class="line">├── aclocal.m4</span><br><span class="line">├── autom4te.cache</span><br><span class="line">│   ├── output.0</span><br><span class="line">│   ├── output.1</span><br><span class="line">│   ├── output.2</span><br><span class="line">│   ├── output.3</span><br><span class="line">│   ├── requests</span><br><span class="line">│   ├── traces.0</span><br><span class="line">│   ├── traces.1</span><br><span class="line">│   ├── traces.2</span><br><span class="line">│   └── traces.3</span><br><span class="line">├── autotools</span><br><span class="line">│   ├── compile</span><br><span class="line">│   ├── config.guess</span><br><span class="line">│   ├── config.rpath</span><br><span class="line">│   ├── config.sub</span><br><span class="line">│   ├── depcomp</span><br><span class="line">│   ├── install-sh</span><br><span class="line">│   ├── ltmain.sh</span><br><span class="line">│   ├── missing</span><br><span class="line">│   ├── test-driver</span><br><span class="line">│   └── ylwrap</span><br><span class="line">├── bin</span><br><span class="line">│   ├── breakpad.cpp</span><br><span class="line">│   ├── cachegen.c</span><br><span class="line">│   ├── darwinvlc.m</span><br><span class="line">│   ├── override.c</span><br><span class="line">│   ├── rootwrap.c</span><br><span class="line">│   ├── vlc.c</span><br><span class="line">│   ├── vlc_win32_rc.rc.in</span><br><span class="line">│   └── winvlc.c</span><br><span class="line">├── bootstrap</span><br><span class="line">├── build-iPhoneOS</span><br><span class="line">│   ├── arm64</span><br><span class="line">│   ├── armv7</span><br><span class="line">│   └── armv7s</span><br><span class="line">├── build-iPhoneSimulator</span><br><span class="line">│   ├── i386</span><br><span class="line">│   └── x86_64</span><br><span class="line">├── compat                          存放可能使用的函数</span><br><span class="line">├── contrib</span><br><span class="line">│   ├── bootstrap                   第三库的编译脚本, bootstrap?</span><br><span class="line">│   ├── iPhone-aarch64-apple-darwin14-aarch64</span><br><span class="line">│   ├── iPhone-armv7-apple-darwin14-armv7</span><br><span class="line">│   ├── iPhone-armv7s-apple-darwin14-armv7s</span><br><span class="line">│   ├── iPhone-i386-apple-darwin14-i386</span><br><span class="line">│   ├── iPhone-x86_64-apple-darwin14-x86_64</span><br><span class="line">│   ├── iPhoneOS-aarch64</span><br><span class="line">│   ├── iPhoneOS-armv7</span><br><span class="line">│   ├── iPhoneOS-armv7s</span><br><span class="line">│   ├── iPhoneSimulator-i386</span><br><span class="line">│   ├── iPhoneSimulator-x86_64</span><br><span class="line">│   ├── src                         第三方库源码包的校验和, 和补丁(可以在此处对第三库进行打补丁)</span><br><span class="line">│   └── tarballs                    第三方库源码包(tar.bz2)</span><br><span class="line">├── doc</span><br><span class="line">├── extras</span><br><span class="line">│   ├── analyser</span><br><span class="line">│   ├── breakpad</span><br><span class="line">│   ├── buildsystem</span><br><span class="line">│   ├── misc</span><br><span class="line">│   ├── package</span><br><span class="line">│   └── tools</span><br><span class="line">├── include</span><br><span class="line">│   ├── vlc</span><br><span class="line">│   ├── vlc_access.h</span><br><span class="line">│   ├── vlc_actions.h</span><br><span class="line">│   ├── ...</span><br><span class="line">├── install-iPhone</span><br><span class="line">│   ├── contrib</span><br><span class="line">│   ├── core</span><br><span class="line">│   └── plugins</span><br><span class="line">├── install-iPhoneOS</span><br><span class="line">│   ├── arm64</span><br><span class="line">│   ├── armv7</span><br><span class="line">│   └── armv7s</span><br><span class="line">├── install-iPhoneSimulator</span><br><span class="line">│   ├── i386</span><br><span class="line">│   └── x86_64</span><br><span class="line">├── lib                             libvlc接口层, 对src/封装播放器接口</span><br><span class="line">│   ├── audio.c</span><br><span class="line">│   ├── core.c</span><br><span class="line">│   ├── dialog.c</span><br><span class="line">│   ├── error.c</span><br><span class="line">│   ├── event.c                     事件管理, play, stop, pause, bufferring等事件</span><br><span class="line">│   ├── libvlc.sym                  ib的接口列表, 具体作用?</span><br><span class="line">│   ├── libvlc_internal.h</span><br><span class="line">│   ├── log.c</span><br><span class="line">│   ├── media.c                     构建输入源, 一个源代表一个media(http://..., file://..)</span><br><span class="line">│   ├── media_discoverer.c</span><br><span class="line">│   ├── media_internal.h</span><br><span class="line">│   ├── media_library.c</span><br><span class="line">│   ├── media_list.c                构建多个输入源</span><br><span class="line">│   ├── media_list_internal.h</span><br><span class="line">│   ├── media_list_path.h</span><br><span class="line">│   ├── media_list_player.c</span><br><span class="line">│   ├── media_player.c              播放器play, stop, pause, seek等接口</span><br><span class="line">│   ├── media_player_internal.h</span><br><span class="line">│   ├── playlist.c</span><br><span class="line">│   ├── renderer_discoverer.c</span><br><span class="line">│   ├── renderer_discoverer_internal.h</span><br><span class="line">│   ├── video.c                     record, snapshot等接口</span><br><span class="line">│   └── vlm.c</span><br><span class="line">├── m4                              autoMake和autoconf的宏文件</span><br><span class="line">│   ├── ax_append_compile_flags.m4</span><br><span class="line">│   ├── ax_append_flag.m4</span><br><span class="line">│   ├── ...</span><br><span class="line">├── make-alias</span><br><span class="line">├── modules</span><br><span class="line">│   ├── access                      access模块</span><br><span class="line">│   ├── access_output</span><br><span class="line">│   ├── arm_neon</span><br><span class="line">│   ├── audio_filter</span><br><span class="line">│   ├── audio_mixer</span><br><span class="line">│   ├── audio_output                频输出模块, 连接硬件, 如audiounit_ios.m, opensles_android.c</span><br><span class="line">│   ├── codec                       编解码器模块</span><br><span class="line">│   ├── control</span><br><span class="line">│   ├── demux                       解复用模块, 解析音视频流等</span><br><span class="line">│   ├── gui                         各平台的UI</span><br><span class="line">│   ├── hw</span><br><span class="line">│   ├── keystore</span><br><span class="line">│   ├── list.sh</span><br><span class="line">│   ├── logger</span><br><span class="line">│   ├── lua</span><br><span class="line">│   ├── meta_engine</span><br><span class="line">│   ├── misc                        被libvlc其他部分使用杂项, 如线程系统, 消息队列, CPU探测, 对象查询系统</span><br><span class="line">│   ├── mux                         复用模块, 流的打包</span><br><span class="line">│   ├── notify</span><br><span class="line">│   ├── packetizer</span><br><span class="line">│   ├── services_discovery</span><br><span class="line">│   ├── spu                         字画面(subtitle, epg osd).</span><br><span class="line">│   ├── stream_extractor</span><br><span class="line">│   ├── stream_filter</span><br><span class="line">│   ├── stream_out</span><br><span class="line">│   ├── text_renderer</span><br><span class="line">│   ├── video_chroma</span><br><span class="line">│   ├── video_filter</span><br><span class="line">│   ├── video_output                视频输出模块, 连接硬件, 如ios.m, android/目录下</span><br><span class="line">│   ├── video_splitter</span><br><span class="line">│   └── visualization</span><br><span class="line">├── share                           图标、脚本</span><br><span class="line">├── src                             vlc架构核心代码</span><br><span class="line">│   ├── check_headers/</span><br><span class="line">│   ├── check_symbols/</span><br><span class="line">│   ├── config/                     从命令行和配置文件加载配置，提供功能模块的读取和写入配置.</span><br><span class="line">│   ├── extras/                     平台特殊性相关代码。</span><br><span class="line">│   ├── interface/                  提供代码中可以调用的接口中，如按键后硬件作出反应。</span><br><span class="line">│   ├── libvlc-module.c             热键, 设置界面显示文字等</span><br><span class="line">│   ├── libvlc.c</span><br><span class="line">│   ├── libvlc.h</span><br><span class="line">│   ├── libvlccore.sym</span><br><span class="line">│   ├── misc/                       各种混合, 包含picture_fifo.c, fifo.c, variables.c, libvlc使用的其他部分功能，如线程系统，消息队列，CPU的检测，对象查找系统，或平台的特定代码。</span><br><span class="line">│   ├── modules/                    模块管理, 模块选择, 模块加载。</span><br><span class="line">│   ├── network/                    提供网络接口, tcp, udp等。</span><br><span class="line">│   ├── playlist/                   管理播放功能，如停止，播放，下一首，随机播放等。</span><br><span class="line">│   ├── revision.c</span><br><span class="line">│   ├── revision.txt</span><br><span class="line">│   ├── version.c</span><br><span class="line">│   ├── test/                       src的测试代码。</span><br><span class="line">│   ├── text/                       字符集。</span><br><span class="line">│   ├── input/                      显示(output)前的大部分流程, access, demux, es_out, decoder.</span><br><span class="line">│   ├── stream_output/              输出音频流和视频流到网络。</span><br><span class="line">│   ├── audio_output/               从解码后的数据队列中获得的数据后播放.</span><br><span class="line">│   ├── video_output/               从解码后的数据队列中获得的数据后播放, 子画面生成(subtitle, epg osd)等。</span><br><span class="line">│   ├── darwin/                     苹果系统相关, 文件系统相关, posix thread的vlc封装等.</span><br><span class="line">│   ├── os2/                        os2平台相关, 同上.</span><br><span class="line">│   ├── posix/                      posix规范, 同上.</span><br><span class="line">│   ├── linux/                      linux系统相关, 同上.</span><br><span class="line">│   ├── android/                    android系统相关, 同上.</span><br><span class="line">│   └── win32/                      类似同上.</span><br><span class="line">└── test                            测试代码.</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-基础概念"><a href="#0x02-基础概念" class="headerlink" title="0x02 基础概念"></a>0x02 基础概念</h3><ul>
+<li>对于一个视频的播放，播放器的执行步骤大致如下：<ol>
+<li>读取原始数据</li>
+<li>解复用(demux)</li>
+<li>解码(decode)</li>
+<li>显示(render)</li>
+</ol>
+</li>
+</ul>
+<ul>
+<li>VLC在包含以上概念的基础上，又抽象出几个其他概念，先列出VLC中抽象出来的重要概念：<ul>
+<li>playlist: playlist表示播放列表，VLC在启动后，即创建一个playlist thread，用户输入后，动态创建input。</li>
+<li>input: input表示输入，当用户通过界面输入一个文件或者流地址时，input thread 被动态创建，该线程的生命周期直到本次播放结束。</li>
+<li>access: access表示访问，是VLC抽象的一个层，该层向下直接使用文件或网络IO接口(http, rstp等)，向上为stream层服务，提供IO接口。</li>
+<li>stream: stream表示流，是VLC抽象的一个层，该层向下直接使用access层提供的IO接口，向上为demux层服务，提供IO接口。</li>
+<li>demux: demux表示解复用，是视频技术中的概念，该层向下直接使用stream层提供的IO接口，数据出来后送es_out。</li>
+<li>es_out: es_out表示输出，是VLC抽象的一个层，该层获取demux后的数据，送decode解码。</li>
+<li>decode: decode表示解码，是视频技术中的概念，获取es_out出来的数据(通过一个fifo交互)，解码后送output。</li>
+<li>output: output表示输出，获取从decode出来的数据，送readerer。</li>
+<li>render: render表示显示，获取从output出来的数据(通过一个fifo交互)，然后显示。</li>
+</ul>
+</li>
+</ul>
+<p>下图显示了这些抽象的概念的关系，其中蓝色表示VLC抽象的概念。<br><img src="/2019/01/12/VLC源码分析/modules_structure.png" alt="modules_structure.png"></p>
+<h3 id="0x04-架构综述"><a href="#0x04-架构综述" class="headerlink" title="0x04 架构综述"></a>0x04 架构综述</h3><p>VLC的整体框架是设计成一套module的管理机制，将功能分类并抽象成modules。</p>
+<p>VLC main： player的main。初始化libVLC 并加载用户界面。<br>libVLCcore：libvlc的核心，抽象出了一个libvlc_instance_t 对象，提供modules的装载/卸载机制。<br>modules： modules提供具体的功能，比如上面的access，demux，decode就是以一个模块的形式存在。<br>External libraries：外部开源库。</p>
+<h4 id="模块管理"><a href="#模块管理" class="headerlink" title="模块管理"></a>模块管理</h4><p>模块位于 modules/子目录，在运行时被加载。每一个模块提供不同的特征适应特定的文件的环境。另外，大量的不断编写的可移植功能位于audio_output/，vidco_output/ 和 gui/模块，以支持新的平台(如:BeoS Mae OS X)。</p>
+<p>模块中的插件被位于 src/misc/modules.c 和 include/modules*.h 中的函数动态加载和卸载。写模块的 API 描述如下，共 3 种:</p>
+<ul>
+<li>(1)模块描述宏:声明模块具有哪种优先级的能力(接口，demux2 等等)，还有GUI模块的实现参数，特定模块的配置变量，快捷方式，子模块等等;</li>
+<li>(2)Open(vlc_object_t* p_object):被 VLC 调用初始化这个模块，它被模块描述宏赋值给了 结构体 module_t 中的 pf_activate 函数指针，被 module_need 调用;</li>
+<li>(3)Close(vlc_object_t* p_object):被 VLC 调用负初始化这个模块，保证消耗 Open 分配的所 有资源。它被模块描述宏赋值给了结构体 module_t 中的 pf_deactivate 函数指针，被 module_unneed 调用。</li>
+</ul>
+<p>用 libvlc 写的模块能够直接被编译进 vlc，因为有的 OS 不支持动态加载代码。被静态编译进 vlc 的模块叫做内置模块。</p>
+<p>模块的加载方式：<br>首先模块先将自身注册到VLC中，代码片段如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vlc_module_begin()</span><br><span class="line">...</span><br><span class="line">vlc_module_end()</span><br></pre></td></tr></table></figure>
+
+<p>然后在需要加载模块的时候，调用module_need接口，去找到合适的模块。找到合适的模块后，会执行注册中设置的回调方法，诸如Open*名字的方法。<br>同样自己可以实现模块，只需要按照VLC模块的标准即可。VLC中很多模块就是通过外部的开源库实现的。</p>
+<p>vlc中模块大致分类：<br><img src="https://jiya.io/usr/uploads/2015/01/453586046.jpg" alt="1364359619_6154.jpg"></p>
+<h4 id="线程管理"><a href="#线程管理" class="headerlink" title="线程管理"></a>线程管理</h4><p>VLC 是一个密集的多线程应用。由于解码器必须预先清空和播放工序必须预先做好流程<br>(比如说解码器和输出必须被分开使用，否则无法保证在要求的时间里播放文件)，因此 VLC 不采用单线程方法。目前不支持单线程的客户端，多线程的解码器通常就意味着更多的开销 (各线程共享内存的问题等)，进程间的通信也会比较复杂。</p>
+<p>VLC 的线程结构基于 pthreads 线程模型。为了可移植的目的，没有直接使用 pthreads 函数，而是做了一系列类似的包裹函数:vlc_thread_create，vlc_thread_exit，vlc_thread_join， vlc_mutex_init ， vlc_mutex_lock ， vlc_mutex_unlock ， vlc_mutex_destroy ， vlc_cond_init ， vlc_cond_signal ， vlc_cond_broadcast ， vlc_cond_wait ， vlc_cond_destroy 和 类 似 结 构:vlc_thread_t，vlc_mutex_t，and vlc_cond_t。</p>
+<p>线程同步</p>
+<p>VLC 的另一个关键特征就是解码和播放是异步的:解码由一个解码器线程工作，播放由音<br>频输出线程或者视频输出线程工作。这个设计的主要目的是不会阻塞任何解码器线程，能够 及时播放正确的音频帧或者视频帧。这样实现也导致产生了在接口，输入，解码器和输出之 间的一个复杂的通讯结构。</p>
+<p>虽然当前接口并不允许，但是让若干个输入和视频输出线程在同一时刻读取多个文件是 可行的(这是 VLC 未来改进的主要方向)。现在的客户端就是用这种思想实现的，这就意味着 如果没有用到全局锁的话那么一个不能重入的库是不能被使用的(尤其是 liba52 库)。</p>
+<p>VLC 输出的流里包含时间戳，被传递给解码器，所有有时间戳标记的流也均被记录，这<br>样输出层可以正确及时的播放这些流。时间 mtime_t 是一个有符号的 64-bit 整形变量，单位 是百万分之一秒，是从 1970 年 7 月 1 日以来的绝对时间。</p>
+<p>当前时间能够被 mdate()函数恢复。一个线程可以被阻塞到 mwait(mtime_t date)等到一 个确定的时间才被执行。也可以用 msleep(mtime_t delay)休眠一段时间。如果有重要的事情 要处理的话，那么应该在正常时间到来之前被唤醒(如色度变换)。例如在 modules\codec\synchro.c 中，通常的解码时间被记录，保证图像被即时解码。</p>
+<h3 id="0x05-流程分析"><a href="#0x05-流程分析" class="headerlink" title="0x05 流程分析"></a>0x05 流程分析</h3><p>程序通过用户配置的方式来加载不同的模块，以下主要对ts流播放流程进行跟踪：<br>首先，给出流程图，参照该图，再继续下面的流程分析，绿色线表示打开VLC后的执行操作；黑色线表示用户输入一个视频后的执行操作；蓝色线从红色圈开始，表示开始播放输入流后的数据流向。<br><img src="https://jiya.io/usr/uploads/2015/01/2942014279.png" alt="vlc_flowpath_analysis.png"></p>
+<p>(1) main函数（vlc/bin/vlc.c）</p>
+<ul>
+<li>1.参数信号处理相关，不详分析。</li>
+<li>2.调用libvlc_new()初始化一个libvlc_instance_t实例。(libvlc_instance_t is opaque. It represents a libvlc instance)<ul>
+<li>2.1 调用libvlc_InternalCreate创建一个libvlc_int_t。(This structure is a LibVLC instance, for use by libvlc core and plugins.)</li>
+<li>2.2 调用libvlc_InternalInit初始化libvlc_int_t实例。</li>
+<li>2.3 初始化libvlc_instance_t其他成员。</li>
+</ul>
+</li>
+<li>3.调用libvlc_add_intf添加模块。<ul>
+<li>3.1 获取playlist，如果为空，则调用playlist_Create创建一个playlist结构，并调用playlist_Activate创建新的playlist线程Thread(src/playlist/thread.c)。</li>
+<li>3.2 调用intf_Create创建一个默认的interface。</li>
+<li>3.2.1 调用vlc_custom_create创建一个vlc object(intf_thread_t)。</li>
+<li>3.2.2 注册一个添加interface的回调方法。</li>
+<li>3.2.3 调用module_need加载一个interface模块。</li>
+</ul>
+</li>
+</ul>
+<p>调用libvlc_playlist_play，如果播放列表不为空，并且被设置为自动播放，则播放播放列表内容。<br>信号处理相关，不详分析。</p>
+<p>(2) 创建一个输入</p>
+<ul>
+<li>1 通过libvlc_media_list_player控制播放, libvlc_media_list_player_play_item<ul>
+<li>1.1 初始化成功后，程序运行在playlist的线程Thread(src/playlist/thread.c)中，循环接收界面输入的请求。</li>
+<li>1.2 当输入一个新的文件或者流地址，在PlaylistVAControl获得信号，并发送该信号。</li>
+<li>1.3 Thread接收到播放请求后，在LoopRequest中调用PlayItem方法。<ul>
+<li>1.3.1 调用input_Create创建一个input(input_thread_t *p_input_thread, 注意这里并不是线程指针而是自定义结构体, input线程的相关信息)结构，并初始化各种成员，其中包括调用input_EsOutNew创建p_es_out_display(es_out)。</li>
+<li>1.3.2 调用input_Start创建一个input线程, 入口函数为Run(src/input/input.c)。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>2 通过libvlc_media_player控制播放, 调用libvlc_media_player_play<ul>
+<li>2.1 input_Create创建(同1.3.1)</li>
+<li>2.2 同1.3.2</li>
+</ul>
+</li>
+</ul>
+<p>(3) 初始化输入</p>
+<ul>
+<li><p>1.调用Run(src/input/input.c)中的Init方法，开始初始化。</p>
+</li>
+<li><p>2.调用input_EsOutTimeshiftNew新建一个50M的Timeshift(暂停缓存)，包括创建并初始化p_es_out(es_out)，与后续步骤9相关。<br>设置input的状态为OPENING_S。</p>
+</li>
+<li><p>3.调用InputSourceNew, 调用input_SplitMRL分解输入uri, 调用InputDemuxNew创建输入Demux模块</p>
+<ul>
+<li><p>3.1 以stream形参为NULL调用demux_NewAdvanced加载”access_demux”模块(first, try to create an access demux)。如:rtsp://源则有access_demux模块, 而不需要走以下步骤分步创建.</p>
+</li>
+<li><p>3.2 如果没有合适的”access_demux”模块，则调用stream_AccessNew创建一个实际的access模块(stream_t* p_stream)。(not an access-demux: create the underlying access stream)</p>
+<ul>
+<li>3.2.1 调用vlc_stream_CommonNew创建stream_t结构体(作为access)。</li>
+<li>3.2.2 调用module_need加载合适的access模块。</li>
+<li>3.2.3 调用access模块的Open*方法，以avio模块为例。<ul>
+<li>3.2.3.1 调用vlc_init_avformat初始化VLC即avformat环境。</li>
+<li>3.2.3.2 调用avio_open2打开该uri。</li>
+<li>3.2.3.3 设置access的IO方法指针。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3.3 通过stream_FilterChainNew添加明确的stream_filter.(attach explicit stream filters to stream)</p>
+</li>
+<li><p>3.4 以stream形参为p_stream调用demux_NewAdvanced创建常规的demux模块.(create a regular demux with the access stream created)</p>
+<ul>
+<li>3.4.1 调用vlc_custom_create创建demux_priv_t结构体, 并初始化(demux_priv_t *)priv-&gt;demux。</li>
+<li>3.4.2 调用vlc_module_load加载合适的demux模块。</li>
+<li>3.4.3 调用demux模块的Open*方法，以avformat/demux模块为例。<ul>
+<li>3.4.3.1 调用stream_Peek从stream层获取数据，用于分析输入的文件格式。</li>
+<li>3.4.3.2 调用av_probe_input_format分析输入的文件格式。</li>
+<li>3.4.3.3 设置demux_sys_t结构体部分变量的值。</li>
+<li>3.4.3.4 调用avformat_alloc_context分配AVFormatContext结构体。</li>
+<li>3.4.3.5 调用avio_alloc_context设置AVFormatContext结构体的AVIOContext类型成员pb，并设置read和seek方法指针。</li>
+<li>3.4.3.6 调用avformat_open_input打开一个输入，这里的input与VLC中的input不是一个概念，关于avformat_open_input的分析详见我的另一篇文章《avformat_open_input详细分析》链接地址。</li>
+<li>3.4.3.7 调用avformat_find_stream_info分析流信息，该方法通过读取数据初始化流以及流解码信息。</li>
+<li>3.4.3.8 根据分析的流信息，设置fmt变量，并调用es_out_Add。</li>
+<li>3.4.3.9 实际调用EsOutAdd(src/input/es_out.c)，添加一个es_out，有几个流就做几次es_out_Add操作，比如该输入中有一个视频流和一个音频流，则作两次es_out_Add操作。</li>
+<li>3.4.3.10 nb_chapters相关未详细分析。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>3.5 设置record相关。</p>
+</li>
+<li><p>3.6 调用demux_Control设置demux pts delay。</p>
+</li>
+<li><p>3.7 调用demux_Control设置fps。</p>
+</li>
+</ul>
+</li>
+<li><p>4.调用demux_Control获取输入的长度。</p>
+</li>
+<li><p>5.调用StartTitle显示标题。</p>
+</li>
+<li><p>6.调用LoadSubtitles加载字幕。</p>
+</li>
+<li><p>7.调用LoadSlaves，含义不详。</p>
+</li>
+<li><p>8.调用InitPrograms，设置es_out和decoder相关。</p>
+<ul>
+<li>8.1 调用UpdatePtsDelay计算正确的pts_delay值。</li>
+<li>8.2 sout相关可选，暂不分析。</li>
+<li>8.3 调用es_out_SetMode，设置es_out的mode为ES_OUT_MODE_AUTO。</li>
+<li>8.4 以DEMUX_SET_GROUP指令调用demux_Control，DEMUX_SET_GROUP/SET_ES only a hint for demuxer (mainly DVB) to allow not reading everything。</li>
+</ul>
+</li>
+<li><p>9.实际调用EsOutControlLocked进入case ES_OUT_SET_MODE分支。</p>
+<ul>
+<li>9.1 设置es_out_sys_t 的b_active和i_mode。</li>
+<li>9.2 调用EsOutSelect方法，根据指定模块选择一个es_out。</li>
+<li>9.3 在EsOutSelect方法中进入ES_OUT_MODE_AUTO分支，进一步调用EsSelect方法，再进一步调用EsCreateDecoder方法创建decoder。<ul>
+<li>9.3.1 调用input_DecoderNew创建一个新的decoder。</li>
+<li>9.3.2 如果需要缓存，调用input_DecoderStartWait发送信号，开始线程等待。</li>
+<li>9.3.3 调用EsOutDecoderChangeDelay设置decode delay。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>10.续9.3.1进入decoder_New方法。</p>
+<ul>
+<li>10.1 调用CreateDecoder创建decoder配置结构体。</li>
+<li>10.1.1 调用vlc_custom_create创建一个vlc object(decoder_t)。</li>
+<li>10.1.2 新建decode fifo。</li>
+<li>10.1.3 调用module_need加载适配的解码模块。<ul>
+<li>10.1.3.1  调用decode模块的OpenDecoder方法，以codec/avcodec模块为例。</li>
+<li>10.1.3.2 调用GetFfmpegCodec方法 determine codec type（源码描述）。</li>
+<li>10.1.3.3 调用vlc_init_avcodec方法初始化解码环境。</li>
+<li>10.1.3.4 调用avcodec_find_decoder设置AVCodec。</li>
+<li>10.1.3.5 调用avcodec_alloc_context3分配一个AVCodecContext。</li>
+<li>10.1.3.6 调用Init*Dec系列初始化解码环境。</li>
+<li>10.1.4 初始化decoder_t结构体其他成员。</li>
+</ul>
+</li>
+<li>10.2 调用vlc_clone创建解码线程DecoderThread。</li>
+</ul>
+</li>
+<li><p>12.续10.1.3.5，以InitVideoDec为例。</p>
+<ul>
+<li>12.1 为decoder_sys_t结构分配内存。</li>
+<li>12.2 设置相关回调方法。</li>
+<li>12.3 设置解码线程类型。</li>
+<li>12.4 调用ffmpeg_InitCodec初始化extradata相关数据。</li>
+<li>12.5 调用OpenVideoCodec方法，设置解码的长宽及采用率，进一步调用avcodec_open2打开codec。</li>
+<li>根据需要，设置线程优先级。</li>
+<li>设置meta相关。</li>
+<li>初始化完成，设置该input的状态为PLAYING_S。</li>
+</ul>
+</li>
+</ul>
+<p>(4) 播放输入<br>MainLoop(src/input/input.c)</p>
+<ul>
+<li><p>1.调用MainLoopDemux访问demuxer去demux数据。</p>
+</li>
+<li><p>2.进一步调用在加载demux模块时设置的demux方法，同样以avformat/demux模块为例，实际调用Demux方法(module/demux/avformat/demux.c)。</p>
+<ul>
+<li>2.1 调用av_read_frame读取一帧数据。</li>
+<li>2.2 判断读取无误时，则为block_t结构分配内存，并将这一帧从AVPacket中拷贝至block_t结构中。</li>
+<li>2.3 如果该帧是I帧，则设置I帧标致位。</li>
+<li>2.4 时间戳处理相关，未深入分析。</li>
+<li>2.5 根据需要调用es_out_Control设置PCR，未深入分析。</li>
+<li>2.6 调用es_out_Send将这一帧数据发送给es_out。</li>
+<li>2.7 调用av_free_packet释放这一帧数据。</li>
+</ul>
+</li>
+<li><p>3.调用es_out_Send后，实际调用EsOutSend(src/input/es_out.c)方法。</p>
+<ul>
+<li>3.1 调用stats_Update更新相关状态，具体未详分析。</li>
+<li>3.2 设置预读相关，如果需要预读，并且到的数据的pts小于预读需要的时间，则设置BLOCK_FLAG_PREROLL标志位。</li>
+<li>3.3 检查sout mode，具体有sync 和async mode，异同未详细分析。</li>
+<li>3.4 如果设置record，将数据dup后送decoder。</li>
+<li>3.5 调用input_DecoderDecode将block_t的数据送至decode fifo中。<ul>
+<li>3.5.1 判断控制速度线程等待相关信息，具体未详细分析。</li>
+<li>3.5.2 如果decode fifo超过最大长度，则清空重置decode fifo。</li>
+<li>3.5.3 调用block_FifoPut将该block_t的数据压入decode fifo，并通知读取线程。</li>
+</ul>
+</li>
+<li>3.6 格式变化判断处理相关，未详细分析。</li>
+<li>3.7 字幕处理相关，未详细分析。</li>
+</ul>
+</li>
+<li><p>4.续3.5进入decode read thread，即DecoderThread(src/input/decoder.c)。</p>
+<ul>
+<li>4.1 调用block_FifoGet方法，从decode fifo中获取数据。</li>
+<li>4.2 基于某些条件，发送停止等待消息给其他线程，未详细分析。</li>
+<li>4.3 调用DecoderProcess方法开始decode a block。</li>
+<li>4.4 判断输入流的格式，调用不同的方法，这里以视频流为例，调用DecoderProcessVideo方法。</li>
+<li>4.5 packetizer相关为深入分析，在DecoderProcessVideo方法中进一步调用DecoderDecodeVideo方法。</li>
+</ul>
+</li>
+<li><p>5.续4.5调用pf_decode_video，这里以avcodec模块的decoder为例，即DecodeVideo(modules/codec/avcodec/video.c)方法，在该方法中，开始真正的解码。</p>
+<ul>
+<li>5.1 如果在Demux中获取的流信息中包含新的extradata，并且原来的extradata数据为空，则调用ffmpeg_InitCodec初始化codec，如果b_delayed_open为true，则调用OpenVideoCodec重新打开codec。</li>
+<li>5.2 调用av_init_packet初始化解码数据包。</li>
+<li>5.3 调用avcodec_decode_video2解码数据。</li>
+<li>5.4 调用av_free_packet释放内存。</li>
+<li>5.5 计算pts值，返回解码后的数据。</li>
+<li>5.6 如果opaque为空，则调用ffmpeg_NewPictBuf方法创建一个新的picture buffer。具体调用回调指针pf_vout_buffer_new指向的vout_new_buffer，进一步调用input_resource_RequestVout最终调用VoutCreate。<ul>
+<li>5.6.1 调用vlc_custom_create创建一个vlc object(vout_thread_t)。</li>
+<li>5.6.2 调用spu_Create初始化sub picture unit。</li>
+<li>5.6.3 调用vlc_clone创建一个output线程Thread(src/video_output/video_output.c)。</li>
+<li>5.6.4 output线程循环调用vout_control_Pop，首次进入ThreadControl方法中，执行ThreadStart方向，创建picture fifo(p-&gt;decoder_fifo)。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>6.pf_decode_video返回后，解码后的数据保存在p_pic中，进一步调用DecoderPlayVideo方法，在该方法中调用vout_PutPicture将解码后的数据压入picture fifo中。</p>
+</li>
+<li><p>7.当picture fifo中有数据后，vout线程调用ThreadDisplayPicture中的ThreadDisplayPreparePicture方法。</p>
+<ul>
+<li>7.1 调用picture_fifo_Pop从picture fifo中获取解码后的数据。</li>
+<li>7.2 如果延迟太大，并且设置延迟丢帧，则丢掉该帧数据。</li>
+</ul>
+</li>
+<li><p>8.调用ThreadDisplayRenderPicture显示图像。</p>
+</li>
+</ul>
+<h3 id="0x06-总结"><a href="#0x06-总结" class="headerlink" title="0x06 总结"></a>0x06 总结</h3><p>对VLC的流程分析，主要通过跟踪数据流向的方式展开。对于最后显示部分的分析还不足，另外很多细节尚未深入。<br>附一张图:<br><img src="/2019/01/12/VLC源码分析/VLC%E6%B5%81%E7%A8%8B%E5%9B%BE.png" alt="VLC流程图.png"></p>
+<p>参考：</p>
+<ul>
+<li><a href="http://blog.csdn.net/tx3344/article/details/8517062" target="_blank" rel="noopener">http://blog.csdn.net/tx3344/article/details/8517062</a></li>
+<li><a href="http://my.oschina.net/xiaot99/blog/197555" target="_blank" rel="noopener">http://my.oschina.net/xiaot99/blog/197555</a></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        
+          
+        
+        <div class="post-tags">
+          
+            <a href="/tags/vlc/" rel="tag"># vlc</a>
+          
+            <a href="/tags/播放器/" rel="tag"># 播放器</a>
+          
+            <a href="/tags/音视频/" rel="tag"># 音视频</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/08/libdvbpsi_documentation/" rel="prev" title="PSI/SI解析">
+                PSI/SI解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Decin">
+            
+              <p class="site-author-name" itemprop="name">Decin</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/Decin" title="GitHub &rarr; https://github.com/Decin" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:it_shiqin@hotmail.com" title="E-Mail &rarr; mailto:it_shiqin@hotmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#VLC源码分析"><span class="nav-number">1.</span> <span class="nav-text">VLC源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-前置信息"><span class="nav-number">1.1.</span> <span class="nav-text">0x00 前置信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-源码结构"><span class="nav-number">1.2.</span> <span class="nav-text">0x01 源码结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-基础概念"><span class="nav-number">1.3.</span> <span class="nav-text">0x02 基础概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x04-架构综述"><span class="nav-number">1.4.</span> <span class="nav-text">0x04 架构综述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#模块管理"><span class="nav-number">1.4.1.</span> <span class="nav-text">模块管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程管理"><span class="nav-number">1.4.2.</span> <span class="nav-text">线程管理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x05-流程分析"><span class="nav-number">1.5.</span> <span class="nav-text">0x05 流程分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x06-总结"><span class="nav-number">1.6.</span> <span class="nav-text">0x06 总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Decin</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.1.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=3.4.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/reading_progress/reading_progress.js"></script>
+
+
+  
+
+
+  <script src="/js/utils.js?v=7.1.2"></script>
+
+  <script src="/js/motion.js?v=7.1.2"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/affix.js?v=7.1.2"></script>
+
+  <script src="/js/schemes/pisces.js?v=7.1.2"></script>
+
+
+
+
+  
+  <script src="/js/scrollspy.js?v=7.1.2"></script>
+<script src="/js/post-details.js?v=7.1.2"></script>
+
+
+
+  
+
+
+  <script src="/js/next-boot.js?v=7.1.2"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
