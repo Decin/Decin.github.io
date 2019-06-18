@@ -448,6 +448,10 @@
           
 
   
+    <div class="comments" id="gitalk-container">
+    </div>
+
+  
 
 
 
@@ -474,7 +478,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Decin">
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Decin">
             
               <p class="site-author-name" itemprop="name">Decin</p>
               <div class="site-description motion-element" itemprop="description"></div>
@@ -743,6 +747,41 @@
 
   
 
+
+  
+    
+
+  
+
+<script src="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
+
+
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
+
+
+
+  
+
+<script src="//cdn.jsdelivr.net/npm/js-md5@0/src/md5.min.js"></script>
+
+<script>
+  var gitalk = new Gitalk({
+    clientID: '830e448927350b38a413',
+    clientSecret: '98df86bc2a0196d039d104d00dfab2ad5d8643bc',
+    repo: 'decin.github.io',
+    owner: 'it_shiqin@hotmail.com',
+    admin: ['Decin'],
+    id: md5(location.pathname),
+    
+      language: window.navigator.language || window.navigator.userLanguage,
+    
+    distractionFreeMode: 'true'
+  });
+  gitalk.render('gitalk-container');
+</script>
 
   
 
